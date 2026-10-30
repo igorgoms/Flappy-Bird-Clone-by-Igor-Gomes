@@ -1,27 +1,190 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title> Flappy Bird Clone, Feb 2018, Chloe Yu </title>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Flappy Bird Clone Arcade - Desenvolvido por Igor Gomes. Jogue no navegador com física aprimorada, efeitos sonoros e placar de recordes." />
+    <meta name="theme-color" content="#4ec0ca" />
 
-        <style type="text/css">
-        	body{
-        		background-color: black;
-        		cursor:url(img/cursor.cur), auto;
-        	}
-            canvas {
-                padding-left: 0;
-                padding-right: 0;
-                margin-left: auto;
-                margin-right: auto;
-                display: block;
-            }
-        </style>
+    <title>Flappy Bird Clone | By Igor Gomes</title>
 
-    </head>
+    <!-- Google Font: Press Start 2P (Pixel Arcade) & Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <body onload="startGame()" style="overflow:hidden"> 
-        <script type="text/javascript" src="js/main.js"></script>
-    </body>
+        body {
+            background: linear-gradient(135deg, #1A1F2C 0%, #0E131F 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            color: #FFFFFF;
+            cursor: url('img/cursor.cur'), auto;
+            overflow-x: hidden;
+            padding: 1rem;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Top Header */
+        .arcade-header {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .arcade-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 3.5vw, 1.65rem);
+            color: #F8D838;
+            text-shadow: 3px 3px 0 #D88000, 5px 5px 0 #000000;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+
+        .arcade-author {
+            font-size: 0.85rem;
+            color: #A0AEC0;
+            letter-spacing: 0.05em;
+        }
+
+        .arcade-author strong {
+            color: #4EC0CA;
+        }
+
+        /* Game Arcade Cabinet Container */
+        .game-wrapper {
+            position: relative;
+            background: #000000;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 6px #2D3748, 0 0 0 10px #1A202C;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 420px;
+            max-width: 100%;
+            height: auto;
+            max-height: 75vh;
+            aspect-ratio: 420 / 650;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            background-color: #4EC0CA;
+        }
+
+        /* Quick Controls Bar */
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 420px;
+            max-width: 100%;
+            margin-top: 1rem;
+            background: rgba(26, 32, 44, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 0.65rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.825rem;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #CBD5E0;
+        }
+
+        .control-key {
+            background: #2D3748;
+            border: 1px solid #4A5568;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.35rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: #F8D838;
+        }
+
+        .btn-sound {
+            background: #2D3748;
+            border: 1px solid #4A5568;
+            color: #FFFFFF;
+            padding: 0.3rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-sound:hover {
+            background: #4A5568;
+            color: #F8D838;
+        }
+
+        /* Footer Credits */
+        footer {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #718096;
+            text-align: center;
+        }
+
+        footer a {
+            color: #4EC0CA;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="arcade-header">
+        <h1 class="arcade-title">FLAPPY BIRD</h1>
+        <p class="arcade-author">Recriado por <strong>Igor Gomes</strong></p>
+    </header>
+
+    <div class="game-wrapper" id="game-container">
+        <!-- Canvas do jogo com resolução fixa de 420x650 -->
+        <canvas id="flappy-canvas" width="420" height="650"></canvas>
+    </div>
+
+    <!-- Barra de Controles e Dicas -->
+    <div class="controls-bar">
+        <div class="control-item">
+            <span class="control-key">ESPAÇO</span>
+            <span>ou Toque p/ Voar</span>
+        </div>
+        <button id="btn-sound" class="btn-sound" aria-label="Ligar ou desligar som">
+            <span>🔊 Som: ON</span>
+        </button>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Flappy Bird Clone • Projeto de Portfólio por <a href="https://github.com/igorgoms" target="_blank" rel="noopener noreferrer">Igor Gomes</a></p>
+    </footer>
+
+    <!-- Game Engine Script -->
+    <script src="js/main.js"></script>
+</body>
 </html>
